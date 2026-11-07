@@ -19,6 +19,11 @@ class BoringNotchXPCHelper: NSObject, BoringNotchXPCHelperProtocol {
             receiver?.featureEvent(data)
         }
     }
+    @objc func setBluetoothDevice(_ id: String, connected: Bool, with reply: @escaping (Data) -> Void) {
+        DispatchQueue.main.async {
+            self.featureHardware.setConnected(id: id, connected: connected, reply: reply)
+        }
+    }
     @objc func configureFeatures(_ bluetooth: Bool, notifications: Bool, with reply: @escaping (Data) -> Void) {
         DispatchQueue.main.async {
             reply(self.featureHardware.configure(bluetooth: bluetooth, notifications: notifications))

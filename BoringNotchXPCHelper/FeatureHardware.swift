@@ -8,6 +8,8 @@ final class FeatureHardware: NSObject {
     private var connectToken: IOBluetoothUserNotification?
     private var disconnectTokens: [IOBluetoothUserNotification] = []
     private var state = FeatureBridgeState()
+    private let deviceQueue = DispatchQueue(label: "NotchPlus.bluetooth.actions")
+    private var changingDevice = false
     private var settle: DispatchWorkItem?
     deinit { connectToken?.unregister(); disconnectTokens.forEach { $0.unregister() } }
     func configure(bluetooth: Bool, notifications: Bool) -> Data {
@@ -21,6 +23,37 @@ final class FeatureHardware: NSObject {
             state.devices = []; state.bluetoothRunning = false
         }
         return (try? JSONEncoder().encode(FeatureBridgeEvent(kind: "state", state: state))) ?? Data()
+    }
+    // Only paired devices can be controlled; synchronous IOBluetooth calls stay off
+    // the main/XPC queues. Always return the observed state, not the requested state.
+    func setConnected(id: String, connected: Bool, reply: @escaping (Data) -> Void) {
+        func result(_ error: String?) {
+            updateDevices()
+            reply((try? JSONEncoder().encode(FeatureDeviceActionResult(state: state, error: error))) ?? Data())
+        }
+        guard !changingDevice else { result("Дождитесь завершения текущего подключения."); return }
+        let paired = (IOBluetoothDevice.pairedDevices() as? [IOBluetoothDevice]) ?? []
+        guard let device = paired.first(where: { $0.addressString == id }) else {
+            result("Устройство больше не сопряжено с этим Mac. Добавьте его в настройках Bluetooth."); return
+        }
+        guard device.isConnected() != connected else { result(nil); return }
+        changingDevice = true
+        deviceQueue.async { [self] in
+            let status = connected
+                ? device.openConnection(nil, withPageTimeout: 0x4000, authenticationRequired: true)
+                : device.closeConnection()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [self] in
+                changingDevice = false
+                let matched = device.isConnected() == connected
+                let error: String? = matched ? nil : connected
+                    ? "Не удалось подключиться. Включите устройство и убедитесь, что оно доступно рядом с Mac. Код: \(status)."
+                    : "macOS не подтвердила отключение устройства. Код: \(status)."
+                updateDevices()
+                let data = (try? JSONEncoder().encode(FeatureDeviceActionResult(state: state, error: error))) ?? Data()
+                reply(data)
+                send(.init(kind: "state", state: state))
+            }
+        }
     }
     @objc private func deviceChanged(_ notification: IOBluetoothUserNotification, device: IOBluetoothDevice) {
         settle?.cancel()

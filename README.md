@@ -7,7 +7,7 @@ Native SwiftUI notch app with six tabs: Music, Shelf, Calendar, Clipboard, Weath
 - Moves the existing calendar/events/reminders into a dedicated tab.
 - Adds local clipboard history with search, pins, pause and deletion.
 - Adds weather with city search (Krasnodar by default), powered by Open-Meteo.
-- Shows paired Bluetooth devices and connection changes inside the island.
+- Connects and disconnects paired Bluetooth devices directly from the Devices tab, with progress and error feedback.
 - Keeps clipboard history in its own dedicated tab.
 - Removes Focus, Notes, the experimental feature hub and lock-screen cards.
 - Shows a smooth, draggable volume control with a percentage inside Dynamic Island.
@@ -92,4 +92,4 @@ Original Boring Notch by **TheBoredTeam and contributors**. This fork remains
 
 ## Weather and devices
 
-Weather sends the selected city coordinates to [Open-Meteo](https://open-meteo.com/); city search sends the search text to its geocoding service. No GPS is used. Bluetooth uses macOS paired-device information without a discovery scan; enable connection activity in Devices. The app does not display content on the lock screen. Focus and Notes are no longer exposed; existing local note files are retained.
+Weather sends the selected city coordinates to [Open-Meteo](https://open-meteo.com/); city search sends the search text to its geocoding service. No GPS is used. Bluetooth uses macOS paired-device information without a discovery scan. Enable Bluetooth in Devices, then use Connect / Disconnect beside an accessory. Pair new devices in System Settings first. The app does not display content on the lock screen. Focus and Notes are no longer exposed; existing local note files are retained.

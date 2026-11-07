@@ -52,8 +52,9 @@ private struct UtilityPage: View {
         Text("The selected city is saved on this Mac. No GPS access is used.").font(.caption2).foregroundStyle(.secondary)
     }
     @ViewBuilder private var devices: some View {
-        Toggle("Bluetooth connection activity", isOn: $hub.bluetoothEnabled)
-        Text("Shows a live activity when a paired Bluetooth device connects or disconnects. No device discovery scan is performed.").font(.caption).foregroundStyle(.secondary)
+        Toggle("Bluetooth-устройства", isOn: $hub.bluetoothEnabled)
+        Text("Подключайте уже сопряжённые устройства прямо здесь. Новое устройство сначала добавьте в системных настройках Bluetooth.").font(.caption).foregroundStyle(.secondary)
+        if let error = hub.deviceActionError { Text(error).foregroundStyle(.orange) }
         if let error = hub.bridge.error { Text(error).foregroundStyle(.orange) }
         if hub.bluetoothEnabled && !hub.bridge.bluetoothRunning { Text("Bluetooth is unavailable or switched off. Check Bluetooth and app access in System Settings.").foregroundStyle(.orange) }
         ForEach(hub.bridge.devices) { device in
@@ -62,7 +63,15 @@ private struct UtilityPage: View {
                 Text(device.name).lineLimit(1)
                 Spacer()
                 Circle().fill(device.connected ? .green : .gray).frame(width: 6, height: 6)
-                Text(device.connected ? "Connected" : "Disconnected").foregroundStyle(.secondary)
+                Text(device.connected ? "Подключено" : "Не подключено").foregroundStyle(.secondary)
+                if hub.changingDeviceID == device.id {
+                    ProgressView().controlSize(.small)
+                    Text(device.connected ? "Отключение…" : "Подключение…").font(.caption)
+                } else {
+                    Button(device.connected ? "Отключить" : "Подключить") {
+                        hub.setConnected(!device.connected, device: device)
+                    }.buttonStyle(.bordered).disabled(hub.changingDeviceID != nil)
+                }
             }.padding(10).background(.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 9))
         }
         if hub.bridge.devices.isEmpty { Text("No paired devices reported by macOS.").foregroundStyle(.secondary) }

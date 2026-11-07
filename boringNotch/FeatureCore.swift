@@ -61,3 +61,8 @@ enum FeatureLayout {
         }
     }
 }
+
+struct FeatureDeviceActionResult: Codable {
+    let state: FeatureBridgeState
+    let error: String?
+}

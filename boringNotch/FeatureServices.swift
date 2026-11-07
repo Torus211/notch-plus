@@ -15,6 +15,8 @@ final class NotchFeatures: ObservableObject {
     @Published var searchError: String?
     @Published var bluetoothEnabled: Bool { didSet { UserDefaults.standard.set(bluetoothEnabled, forKey: key("bluetooth")); configureBridge() } }
     @Published var locked = false { didSet { if locked { banner = nil; configureBridge() } else { configureBridge(); Task { await refreshWeather() } } } }
+    @Published private(set) var changingDeviceID: String?
+    @Published private(set) var deviceActionError: String?
     @Published private(set) var bridge = FeatureBridgeState()
     @Published private(set) var banner: (String, String, String)?
     var bridgeConfigure: ((Bool, Bool) async throws -> Data)?
@@ -53,6 +55,21 @@ final class NotchFeatures: ObservableObject {
     }
     private func save<T: Encodable>(_ value: T, _ name: String) {
         if let data = try? JSONEncoder().encode(value) { UserDefaults.standard.set(data, forKey: key(name)) }
+    }
+    func setConnected(_ connected: Bool, device: FeatureDevice) {
+        guard changingDeviceID == nil, !locked else { return }
+        changingDeviceID = device.id; deviceActionError = nil
+        Task {
+            defer { changingDeviceID = nil }
+            do {
+                let data = try await XPCHelperClient.shared.setBluetoothDevice(device.id, connected: connected)
+                let result = try JSONDecoder().decode(FeatureDeviceActionResult.self, from: data)
+                receive(try JSONEncoder().encode(FeatureBridgeEvent(kind: "state", state: result.state)))
+                deviceActionError = result.error
+            } catch {
+                deviceActionError = "Сервис Bluetooth недоступен. Перезапустите приложение и повторите попытку."
+            }
+        }
     }
     func configureBridge() {
         bridgeTask?.cancel()

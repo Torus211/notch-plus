@@ -72,6 +72,12 @@ final class XPCHelperClient {
         )
     }
     
+    nonisolated func setBluetoothDevice(_ id: String, connected: Bool) async throws -> Data {
+        let service = await MainActor.run { ensureRemoteService() }
+        return try await service.withContinuation { remote, continuation in
+            remote.setBluetoothDevice(id, connected: connected) { continuation.resume(returning: $0) }
+        }
+    }
     nonisolated func configureFeatures(bluetooth: Bool, notifications: Bool) async throws -> Data {
         let service = await MainActor.run { ensureRemoteService() }
         return try await service.withContinuation { remote, continuation in
