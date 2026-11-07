@@ -18,7 +18,7 @@ struct OnboardingFinishView: View {
 
             Image(systemName: "sparkles")
                 .font(.system(size: 60))
-                .foregroundColor(.effectiveAccent)
+                .foregroundColor(.accentColor)
                 .padding()
 
             Text("You're All Set!")

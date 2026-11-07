@@ -517,7 +517,7 @@ struct MusicSliderView: View {
                 range: 0...duration,
                 color: Defaults[.sliderColor] == SliderColorEnum.albumArt
                     ? Color(nsColor: color).ensureMinimumBrightness(factor: 0.8)
-                    : Defaults[.sliderColor] == SliderColorEnum.accent ? .effectiveAccent : .white,
+                    : Defaults[.sliderColor] == SliderColorEnum.accent ? .accentColor : .white,
                 dragging: $dragging,
                 lastDragged: $lastDragged,
                 onValueChange: onValueChange

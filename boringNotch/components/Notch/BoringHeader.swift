@@ -19,7 +19,7 @@ struct BoringHeader: View {
                 Label("NOTCH PLUS", systemImage: "sparkle")
                     .font(.system(size: 10, weight: .semibold, design: .rounded))
                     .tracking(1.2)
-                    .foregroundStyle(.mint)
+                    .foregroundStyle(Color.accentColor)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .opacity(vm.notchState == .closed ? 0 : 1)

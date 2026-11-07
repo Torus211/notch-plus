@@ -6,8 +6,10 @@
 //
 
 import SwiftUI
+import Defaults
 
 struct InlineHUD: View {
+    @Default(.systemEventIndicatorUseAccent) private var useAccent
     @EnvironmentObject var vm: BoringViewModel
     @Binding var type: SneakContentType
     @Binding var value: CGFloat
@@ -135,7 +137,7 @@ struct InlineHUD: View {
                     ZStack(alignment: .leading) {
                         Capsule().fill(.white.opacity(0.16))
                         Capsule()
-                            .fill(LinearGradient(colors: [.white.opacity(0.75), .white],
+                            .fill(LinearGradient(colors: [(useAccent ? Color.accentColor : .white).opacity(0.75), useAccent ? Color.accentColor : .white],
                                 startPoint: .leading, endPoint: .trailing))
                             .frame(width: geometry.size.width * volumeLevel)
                     }

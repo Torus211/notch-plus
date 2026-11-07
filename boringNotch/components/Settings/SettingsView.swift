@@ -16,7 +16,24 @@ import SwiftUIIntrospect
 
 struct SettingsView: View {
     @State private var selectedTab = "General"
-    @State private var accentColorUpdateTrigger = UUID()
+
+    private struct SectionLink: Identifiable {
+        let id: String
+        let title: String
+        let icon: String
+    }
+    private static let sections: [SectionLink] = [
+        .init(id: "General", title: "General", icon: "gear"),
+        .init(id: "Appearance", title: "Appearance", icon: "eye"),
+        .init(id: "Media", title: "Media", icon: "play.laptopcomputer"),
+        .init(id: "Calendar", title: "Calendar", icon: "calendar"),
+        .init(id: "HUD", title: "HUDs", icon: "dial.medium.fill"),
+        .init(id: "Battery", title: "Battery", icon: "battery.100.bolt"),
+        .init(id: "Shelf", title: "Shelf", icon: "books.vertical"),
+        .init(id: "Shortcuts", title: "Shortcuts", icon: "keyboard"),
+        .init(id: "Advanced", title: "Advanced", icon: "gearshape.2"),
+        .init(id: "About", title: "About", icon: "info.circle")
+    ]
 
     let updaterController: SPUStandardUpdaterController?
 
@@ -27,47 +44,26 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $selectedTab) {
-                NavigationLink(value: "General") {
-                    Label("General", systemImage: "gear")
+            ScrollView {
+                VStack(spacing: 5) {
+                    ForEach(Self.sections) { section in
+                        Button { selectedTab = section.id } label: {
+                            Label(section.title, systemImage: section.icon)
+                                .font(.system(size: 13, weight: selectedTab == section.id ? .semibold : .regular))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 9)
+                                .foregroundStyle(selectedTab == section.id ? Color.accentColor : .primary)
+                                .background(selectedTab == section.id ? Color.accentColor.opacity(0.18) : .clear,
+                                    in: RoundedRectangle(cornerRadius: 8))
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(selectedTab == section.id ? .isSelected : [])
+                    }
                 }
-                NavigationLink(value: "Appearance") {
-                    Label("Appearance", systemImage: "eye")
-                }
-                NavigationLink(value: "Media") {
-                    Label("Media", systemImage: "play.laptopcomputer")
-                }
-                NavigationLink(value: "Calendar") {
-                    Label("Calendar", systemImage: "calendar")
-                }
-                NavigationLink(value: "HUD") {
-                    Label("HUDs", systemImage: "dial.medium.fill")
-                }
-                NavigationLink(value: "Battery") {
-                    Label("Battery", systemImage: "battery.100.bolt")
-                }
-//                NavigationLink(value: "Downloads") {
-//                    Label("Downloads", systemImage: "square.and.arrow.down")
-//                }
-                NavigationLink(value: "Shelf") {
-                    Label("Shelf", systemImage: "books.vertical")
-                }
-                NavigationLink(value: "Shortcuts") {
-                    Label("Shortcuts", systemImage: "keyboard")
-                }
-                // NavigationLink(value: "Extensions") {
-                //     Label("Extensions", systemImage: "puzzlepiece.extension")
-                // }
-                NavigationLink(value: "Advanced") {
-                    Label("Advanced", systemImage: "gearshape.2")
-                }
-                NavigationLink(value: "About") {
-                    Label("About", systemImage: "info.circle")
-                }
+                .padding(10)
             }
-            .listStyle(SidebarListStyle())
-            .tint(.effectiveAccent)
-            .toolbar(removing: .sidebarToggle)
             .navigationSplitViewColumnWidth(200)
         } detail: {
             Group {
@@ -120,11 +116,7 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(width: 700)
         .background(Color(NSColor.windowBackgroundColor))
-        .tint(.effectiveAccent)
-        .id(accentColorUpdateTrigger)
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AccentColorChanged"))) { _ in
-            accentColorUpdateTrigger = UUID()
-        }
+        .notchAccentTheme()
     }
 }
 
@@ -159,8 +151,7 @@ struct GeneralSettings: View {
                 )) {
                     Text("Show menu bar icon")
                 }
-                .tint(.effectiveAccent)
-                LaunchAtLogin.Toggle("Launch at login")
+                    LaunchAtLogin.Toggle("Launch at login")
                 Defaults.Toggle(key: .showOnAllDisplays) {
                     Text("Show on all displays")
                 }
@@ -270,7 +261,6 @@ struct GeneralSettings: View {
             }
             .controlSize(.extraLarge)
         }
-        .accentColor(.effectiveAccent)
         .navigationTitle("General")
         .onChange(of: openNotchOnHover) {
             if !openNotchOnHover {
@@ -378,7 +368,6 @@ struct Charge: View {
                 await XPCHelperClient.shared.isAccessibilityAuthorized()
             }
         }
-        .accentColor(.effectiveAccent)
         .navigationTitle("Battery")
     }
 }
@@ -562,7 +551,6 @@ struct HUD: View {
                 }
             }
         }
-        .accentColor(.effectiveAccent)
         .navigationTitle("HUDs")
         .task {
             accessibilityAuthorized = MediaKeyInterceptor.shared.isAccessibilityAuthorized()
@@ -610,7 +598,7 @@ struct Media: View {
                             destination: URL(string: "https://github.com/pear-devs/pear-desktop")!
                         )
                         .font(.caption)
-                        .foregroundColor(.blue)  // Ensures it's visibly a link
+                        .foregroundColor(.accentColor)
                     }
                 } else {
                     Text(
@@ -675,7 +663,6 @@ struct Media: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .accentColor(.effectiveAccent)
         .navigationTitle("Media")
     }
 
@@ -786,7 +773,6 @@ struct CalendarSettings: View {
                 }
             }
         }
-        .accentColor(.effectiveAccent)
         .navigationTitle("Calendar")
         .onAppear {
             Task {
@@ -1006,7 +992,6 @@ struct Shelf: View {
                     .foregroundColor(.secondary)
             }
         }
-        .accentColor(.effectiveAccent)
         .navigationTitle("Shelf")
     }
 }
@@ -1143,8 +1128,7 @@ struct Shelf: View {
 //                }
 //            }
 //        }
-//        .accentColor(.effectiveAccent)
-//        .navigationTitle("Extensions")
+////        .navigationTitle("Extensions")
 //        // TipsView()
 //        // .padding(.horizontal, 19)
 //    }
@@ -1255,7 +1239,7 @@ struct Appearance: View {
                         .background(
                             selectedListVisualizer != nil
                                 ? selectedListVisualizer == visualizer
-                                    ? Color.effectiveAccent : Color.clear : Color.clear,
+                                    ? Color.accentColor : Color.clear : Color.clear,
                             in: RoundedRectangle(cornerRadius: 5)
                         )
                         .contentShape(Rectangle())
@@ -1389,7 +1373,6 @@ struct Appearance: View {
                 }
             }
         }
-        .accentColor(.effectiveAccent)
         .navigationTitle("Appearance")
     }
 
@@ -1490,8 +1473,8 @@ struct Advanced: View {
                                         selectedPresetColor = preset
                                         customAccentColor = preset.color
                                         saveCustomColor(preset.color)
-                                        forceUiUpdate()
                                     }
+                                    .accessibilityLabel(preset.rawValue)
                                 }
                                 Spacer()
                             }
@@ -1517,7 +1500,6 @@ struct Advanced: View {
                                         customAccentColor = newColor
                                         selectedPresetColor = nil
                                         saveCustomColor(newColor)
-                                        forceUiUpdate()
                                     }
                                 ), supportsOpacity: false) {
                                     ZStack {
@@ -1572,7 +1554,7 @@ struct Advanced: View {
                                 .background(
                                     RoundedRectangle(cornerRadius: 20, style: .circular)
                                         .strokeBorder(
-                                            icon == selectedIcon ? Color.effectiveAccent : .clear,
+                                            icon == selectedIcon ? Color.accentColor : .clear,
                                             lineWidth: 2.5
                                         )
                                 )
@@ -1585,7 +1567,7 @@ struct Advanced: View {
                                 .padding(.vertical, 3)
                                 .background(
                                     Capsule()
-                                        .fill(icon == selectedIcon ? Color.effectiveAccent : .clear)
+                                        .fill(icon == selectedIcon ? Color.accentColor : .clear)
                                 )
                         }
                         .onTapGesture {
@@ -1622,17 +1604,9 @@ struct Advanced: View {
                 Text("Window Behavior")
             }
         }
-        .accentColor(.effectiveAccent)
         .navigationTitle("Advanced")
         .onAppear {
             loadCustomColor()
-        }
-    }
-    
-    private func forceUiUpdate() {
-        // Force refresh the UI
-        DispatchQueue.main.async {
-            NotificationCenter.default.post(name: Notification.Name("AccentColorChanged"), object: nil)
         }
     }
     
@@ -1640,7 +1614,6 @@ struct Advanced: View {
         let nsColor = NSColor(color)
         if let colorData = try? NSKeyedArchiver.archivedData(withRootObject: nsColor, requiringSecureCoding: false) {
             Defaults[.customAccentColorData] = colorData
-            forceUiUpdate()
         }
     }
     
@@ -1734,7 +1707,6 @@ struct Shortcuts: View {
                 KeyboardShortcuts.Recorder("Toggle Notch Open:", name: .toggleNotchOpen)
             }
         }
-        .accentColor(.effectiveAccent)
         .navigationTitle("Shortcuts")
     }
 }

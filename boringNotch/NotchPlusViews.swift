@@ -2,15 +2,13 @@ import AppKit
 import Defaults
 import SwiftUI
 
-private let plusAccent = Color.mint
-
 struct PlusEmptyState: View {
     let icon: String
     let title: String
     let detail: String
     var body: some View {
         VStack(spacing: 9) {
-            Image(systemName: icon).font(.system(size: 28, weight: .light)).foregroundStyle(plusAccent)
+            Image(systemName: icon).font(.system(size: 28, weight: .light)).foregroundStyle(Color.accentColor)
             Text(title).font(.headline).foregroundStyle(.white)
             Text(detail).font(.caption).foregroundStyle(.gray).multilineTextAlignment(.center)
         }
@@ -45,7 +43,7 @@ struct ClipboardHistoryView: View {
                 .padding(8).background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 9))
                 Button { pinnedOnly.toggle() } label: {
                     Image(systemName: pinnedOnly ? "pin.fill" : "pin")
-                        .foregroundStyle(pinnedOnly ? plusAccent : .gray)
+                        .foregroundStyle(pinnedOnly ? Color.accentColor : .gray)
                 }.help("Только закреплённые")
                 Button { history.enabled.toggle() } label: {
                     Image(systemName: history.enabled ? "pause.circle" : "play.circle")
@@ -86,13 +84,13 @@ struct ClipboardHistoryView: View {
                                         }
                                         Spacer(minLength: 0)
                                         Image(systemName: copiedID == record.id ? "checkmark" : "doc.on.doc")
-                                            .foregroundStyle(copiedID == record.id ? plusAccent : .gray)
+                                            .foregroundStyle(copiedID == record.id ? Color.accentColor : .gray)
                                     }.contentShape(Rectangle())
                                 }
                                 .help("Скопировать. Затем нажми ⌘V в нужном приложении.")
                                 Button { history.pin(record) } label: {
                                     Image(systemName: record.pinned ? "pin.fill" : "pin")
-                                        .foregroundStyle(record.pinned ? plusAccent : .gray)
+                                        .foregroundStyle(record.pinned ? Color.accentColor : .gray)
                                 }.help(record.pinned ? "Открепить" : "Закрепить")
                                 Button { history.delete(record) } label: {
                                     Image(systemName: "xmark").font(.caption2).foregroundStyle(.gray)
@@ -105,7 +103,7 @@ struct ClipboardHistoryView: View {
                 }.scrollIndicators(.never)
             }
             HStack {
-                Circle().fill(history.enabled ? plusAccent : .orange).frame(width: 5, height: 5)
+                Circle().fill(history.enabled ? Color.accentColor : .orange).frame(width: 5, height: 5)
                 Text(history.enabled ? "Локально · \(history.records.count)/120 · до 16 МБ" : "Запись приостановлена")
                 Spacer()
                 Text(history.error ?? "Пароли с защитной меткой не сохраняются")
@@ -121,8 +119,8 @@ struct ClipboardHistoryView: View {
             Image(nsImage: image).resizable().scaledToFit().frame(width: 32, height: 32)
         } else {
             Image(systemName: record.kind == .file ? "doc.fill" : "text.alignleft")
-                .foregroundStyle(plusAccent).frame(width: 32, height: 32)
-                .background(plusAccent.opacity(0.1), in: RoundedRectangle(cornerRadius: 7))
+                .foregroundStyle(Color.accentColor).frame(width: 32, height: 32)
+                .background(Color.accentColor.opacity(0.1), in: RoundedRectangle(cornerRadius: 7))
         }
     }
 }
@@ -163,6 +161,7 @@ struct PlusCalendarView: View {
 }
 
 struct FocusTimerView: View {
+    @Environment(\.notchThemeAccent) private var accent
     @ObservedObject private var timer = FocusTimer.shared
 
     var body: some View {
@@ -170,12 +169,12 @@ struct FocusTimerView: View {
             ZStack {
                 Circle().stroke(.white.opacity(0.08), lineWidth: 7)
                 Circle().trim(from: 0, to: min(1, max(0, timer.clock.remaining / timer.clock.duration)))
-                    .stroke(plusAccent, style: StrokeStyle(lineWidth: 7, lineCap: .round))
+                    .stroke(accent, style: StrokeStyle(lineWidth: 7, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 VStack(spacing: 4) {
                     Text(timer.display).font(.system(size: 36, weight: .light, design: .rounded)).monospacedDigit()
                     Text(timer.clock.finished ? "Готово!" : timer.clock.isBreak ? "ПЕРЕРЫВ" : "ФОКУС")
-                        .font(.system(size: 10, weight: .semibold)).tracking(2).foregroundStyle(plusAccent)
+                        .font(.system(size: 10, weight: .semibold)).tracking(2).foregroundStyle(accent)
                 }
             }.frame(width: 160, height: 160)
             VStack(alignment: .leading, spacing: 14) {
@@ -185,14 +184,17 @@ struct FocusTimerView: View {
                 HStack(spacing: 6) {
                     ForEach([15, 25, 45], id: \.self) { minutes in
                         Button("\(minutes) мин") { timer.reset(minutes: minutes, isBreak: false) }
-                            .tint(!timer.clock.isBreak && Int(timer.clock.duration / 60) == minutes ? plusAccent : .gray)
+                            .tint(!timer.clock.isBreak && Int(timer.clock.duration / 60) == minutes ? accent : .gray)
                     }
                 }.buttonStyle(.bordered)
                 HStack(spacing: 8) {
                     Button { timer.toggle() } label: {
                         Label(timer.clock.deadline == nil ? "Начать" : "Пауза",
                             systemImage: timer.clock.deadline == nil ? "play.fill" : "pause.fill")
-                    }.buttonStyle(.borderedProminent).tint(plusAccent).foregroundStyle(.black)
+                            .padding(.horizontal, 12).padding(.vertical, 7)
+                            .foregroundStyle(accent.readableForeground)
+                            .background(accent, in: RoundedRectangle(cornerRadius: 7))
+                    }.buttonStyle(.plain)
                     Button { timer.reset() } label: { Image(systemName: "arrow.counterclockwise") }
                         .buttonStyle(.bordered).help("Сбросить таймер")
                     Button("Перерыв 5 мин") { timer.reset(minutes: 5, isBreak: true) }.buttonStyle(.bordered)
@@ -217,7 +219,7 @@ struct QuickNotesView: View {
                     NSPasteboard.general.setString(notes.text, forType: .string)
                     copied = true
                 } label: { Label(copied ? "Скопировано" : "Копировать", systemImage: copied ? "checkmark" : "doc.on.doc") }
-                    .buttonStyle(.plain).foregroundStyle(plusAccent).disabled(notes.text.isEmpty)
+                    .buttonStyle(.plain).foregroundStyle(Color.accentColor).disabled(notes.text.isEmpty)
             }
             ZStack(alignment: .topLeading) {
                 TextEditor(text: $notes.text)

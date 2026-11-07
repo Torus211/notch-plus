@@ -61,7 +61,7 @@ struct DynamicNotchApp: App {
                 SettingsWindowController.shared.showWindow()
             }
             .keyboardShortcut(KeyEquivalent(","), modifiers: .command)
-            Text("Notch Plus 1.1 · на основе Boring Notch 2.7.3")
+            Text("Notch Plus 1.1.1 · на основе Boring Notch 2.7.3")
             Divider()
             Button("Перезапустить Notch Plus") {
                 ApplicationRelauncher.restart()

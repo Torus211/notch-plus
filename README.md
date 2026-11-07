@@ -8,13 +8,14 @@ Native SwiftUI notch app with six tabs: Music, Shelf, Calendar, Clipboard, Focus
 - Adds local clipboard history with search, pins, pause and deletion.
 - Adds a focus/break timer and an autosaving quick note.
 - Shows a smooth, draggable volume control with a percentage inside Dynamic Island.
+- Applies the selected accent immediately across the island, tabs, focus timer, clipboard, notes and settings.
 - Runs without a Dock icon, including while settings are open.
 - Bounds clipboard payloads and thumbnail caching, coalesces background writes,
   and stops player/lyrics timeline updates while playback is paused.
 
 ## Install
 
-Download **[Notch Plus 1.1.0 for Apple Silicon](https://github.com/Torus211/notch-plus/releases/download/v1.1.0/NotchPlus-1.1.0-arm64.zip)**
+Download **[Notch Plus 1.1.1 for Apple Silicon](https://github.com/Torus211/notch-plus/releases/download/v1.1.1/NotchPlus-1.1.1-arm64.zip)**
 or visit **[the latest release](https://github.com/Torus211/notch-plus/releases/latest)**.
 The packaged app and helper require **macOS 15.5 or later** and an **Apple Silicon Mac**.
 Intel Macs are not supported by this archive.
