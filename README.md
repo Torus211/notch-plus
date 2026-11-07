@@ -12,7 +12,8 @@ Native SwiftUI notch app with six tabs: Music, Shelf, Calendar, Clipboard, Focus
 
 ## Install
 
-Download the Apple Silicon archive from **Releases**, unzip it, move **Notch Plus.app**
+Download the [Apple Silicon app](https://github.com/Torus211/notch-plus/raw/refs/heads/main/releases/NotchPlus-1.0.0-arm64.zip)
+or visit **Releases**, unzip it, move **Notch Plus.app**
 to Applications, and launch. This is an ad-hoc signed local build, not notarized by Apple.
 Only run one notch application at a time. macOS may ask for calendar/reminder access.
 
