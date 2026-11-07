@@ -297,6 +297,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        NSApp.setActivationPolicy(.accessory)
         _ = ClipboardHistory.shared
         _ = FocusTimer.shared
 

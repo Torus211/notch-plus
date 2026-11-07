@@ -67,8 +67,8 @@ class SettingsWindowController: NSWindowController {
     }
     
     func showWindow() {
-        // Set app to regular mode first
-        NSApp.setActivationPolicy(.regular)
+        // Settings can receive keyboard focus without adding an icon to the Dock.
+        NSApp.setActivationPolicy(.accessory)
         
         // If window is already visible, bring it to front properly
         if window?.isVisible == true {
@@ -115,8 +115,7 @@ extension SettingsWindowController: NSWindowDelegate {
     }
     
     func windowDidBecomeKey(_ notification: Notification) {
-        // Ensure app is in regular mode when window becomes key
-        NSApp.setActivationPolicy(.regular)
+        NSApp.setActivationPolicy(.accessory)
     }
     
     func windowDidResignKey(_ notification: Notification) {

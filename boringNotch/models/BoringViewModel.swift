@@ -145,7 +145,7 @@ class BoringViewModel: NSObject, ObservableObject {
 
         case .denied, .restricted:
             DispatchQueue.main.async {
-                NSApp.setActivationPolicy(.regular)
+                NSApp.setActivationPolicy(.accessory)
                 NSApp.activate(ignoringOtherApps: true)
 
                 let alert = NSAlert()
