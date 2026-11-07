@@ -1594,9 +1594,6 @@ struct Advanced: View {
                 Defaults.Toggle(key: .hideTitleBar) {
                     Text("Hide title bar")
                 }
-                Defaults.Toggle(key: .showOnLockScreen) {
-                    Text("Show notch on lock screen")
-                }
                 Defaults.Toggle(key: .hideFromScreenRecording) {
                     Text("Hide from screen recording")
                 }

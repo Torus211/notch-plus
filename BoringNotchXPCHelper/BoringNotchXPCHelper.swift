@@ -11,6 +11,20 @@ import IOKit
 import CoreGraphics
 
 class BoringNotchXPCHelper: NSObject, BoringNotchXPCHelperProtocol {
+    private let featureHardware = FeatureHardware()
+    init(connection: NSXPCConnection) {
+        super.init()
+        featureHardware.onEvent = { [weak connection] data in
+            let receiver = connection?.remoteObjectProxyWithErrorHandler { _ in } as? NotchFeatureEventSink
+            receiver?.featureEvent(data)
+        }
+    }
+    @objc func configureFeatures(_ bluetooth: Bool, notifications: Bool, with reply: @escaping (Data) -> Void) {
+        DispatchQueue.main.async {
+            reply(self.featureHardware.configure(bluetooth: bluetooth, notifications: notifications))
+        }
+    }
+
     
     @objc func isAccessibilityAuthorized(with reply: @escaping (Bool) -> Void) {
         reply(AXIsProcessTrusted())

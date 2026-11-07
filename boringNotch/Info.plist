@@ -15,5 +15,7 @@
 	<array>
 		<dict/>
 	</array>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Notch Plus показывает подключение и отключение ваших Bluetooth-устройств.</string>
 </dict>
 </plist>

@@ -61,7 +61,7 @@ struct DynamicNotchApp: App {
                 SettingsWindowController.shared.showWindow()
             }
             .keyboardShortcut(KeyEquivalent(","), modifiers: .command)
-            Text("Notch Plus 1.1.1 · на основе Boring Notch 2.7.3")
+            Text("Notch Plus 1.2.0 · на основе Boring Notch 2.7.3")
             Divider()
             Button("Перезапустить Notch Plus") {
                 ApplicationRelauncher.restart()
@@ -100,7 +100,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         NotchPlusStorage.shared.flush()
         ClipboardHistory.shared.flush()
-        QuickNotes.shared.flush()
         NotificationCenter.default.removeObserver(self)
         if let observer = screenLockedObserver {
             DistributedNotificationCenter.default().removeObserver(observer)
@@ -118,6 +117,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @MainActor
     func onScreenLocked(_ notification: Notification) {
         isScreenLocked = true
+        NotchFeatures.shared.locked = true
         if !Defaults[.showOnLockScreen] {
             cleanupWindows()
         } else {
@@ -128,6 +128,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @MainActor
     func onScreenUnlocked(_ notification: Notification) {
         isScreenLocked = false
+        NotchFeatures.shared.locked = false
         if !Defaults[.showOnLockScreen] {
             adjustWindowPosition(changeAlpha: true)
         } else {
@@ -309,7 +310,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         _ = ClipboardHistory.shared
-        _ = FocusTimer.shared
+        NotchFeatures.shared.start { bluetooth, notifications in
+            try await XPCHelperClient.shared.configureFeatures(bluetooth: bluetooth, notifications: notifications)
+        }
+        Defaults[.boringShelf] = true
+        Defaults[.showOnLockScreen] = false
 
         NotificationCenter.default.addObserver(
             self,

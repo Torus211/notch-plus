@@ -9,6 +9,7 @@ import Foundation
 
 /// The protocol that this service will vend as its API. This protocol will also need to be visible to the process hosting the service.
 @objc protocol BoringNotchXPCHelperProtocol {
+    func configureFeatures(_ bluetooth: Bool, notifications: Bool, with reply: @escaping (Data) -> Void)
     func isAccessibilityAuthorized(with reply: @escaping (Bool) -> Void)
     func requestAccessibilityAuthorization()
     func ensureAccessibilityAuthorization(_ promptIfNeeded: Bool, with reply: @escaping (Bool) -> Void)
@@ -41,3 +42,5 @@ import Foundation
 
      connectionToService.invalidate()
 */
+
+@objc protocol NotchFeatureEventSink { func featureEvent(_ data: Data) }

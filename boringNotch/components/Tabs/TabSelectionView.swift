@@ -9,7 +9,7 @@ import SwiftUI
 import Defaults
 
 struct TabModel: Identifiable {
-    let id = UUID()
+    var id: String { view.rawValue }
     let label: String
     let icon: String
     let view: NotchViews
@@ -20,21 +20,26 @@ let tabs = [
     TabModel(label: "Полка", icon: "tray.fill", view: .shelf),
     TabModel(label: "Календарь", icon: "calendar", view: .calendar),
     TabModel(label: "Буфер", icon: "doc.on.clipboard", view: .clipboard),
-    TabModel(label: "Фокус", icon: "timer", view: .focus),
-    TabModel(label: "Заметки", icon: "square.and.pencil", view: .notes)
+    TabModel(label: "Погода", icon: "cloud.sun.fill", view: .weather),
+    TabModel(label: "Устройства", icon: "headphones", view: .devices)
 ]
+
+@MainActor
+var configuredFeatureTabs: [TabModel] {
+    tabs
+}
 
 struct TabSelectionView: View {
     @ObservedObject var coordinator = BoringViewCoordinator.shared
     @Namespace var animation
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(tabs.filter { $0.view != .shelf || Defaults[.boringShelf] }) { tab in
+            ForEach(configuredFeatureTabs) { tab in
                     TabButton(label: tab.label, icon: tab.icon, selected: coordinator.currentView == tab.view) {
                         withAnimation(.smooth) {
                             coordinator.currentView = tab.view
                         }
-                        if tab.view != .notes && tab.view != .clipboard {
+                        if tab.view != .weather && tab.view != .clipboard {
                             NSApp.keyWindow?.resignKey()
                         }
                     }

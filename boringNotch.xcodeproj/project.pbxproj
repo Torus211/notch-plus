@@ -146,6 +146,9 @@
 		B1F747F92EC7E94000F841DB /* LottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1F747F82EC7E94000F841DB /* LottieView.swift */; };
 		B1FEB4992C7686630066EBBC /* PanGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FEB4982C7686630066EBBC /* PanGesture.swift */; };
 		F38DE6482D8243E7008B5C6D /* BatteryActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F38DE6472D8243E2008B5C6D /* BatteryActivityManager.swift */; };
+		CCFEA1000000000000000001 /* FeatureCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCFEA0000000000000000001 /* FeatureCore.swift */; };
+		CCFEA1000000000000000002 /* FeatureServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCFEA0000000000000000002 /* FeatureServices.swift */; };
+		CCFEA1000000000000000003 /* FeatureViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCFEA0000000000000000003 /* FeatureViews.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -315,6 +318,9 @@
 		B1F747F82EC7E94000F841DB /* LottieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LottieView.swift; sourceTree = "<group>"; };
 		B1FEB4982C7686630066EBBC /* PanGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanGesture.swift; sourceTree = "<group>"; };
 		F38DE6472D8243E2008B5C6D /* BatteryActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryActivityManager.swift; sourceTree = "<group>"; };
+		CCFEA0000000000000000001 /* FeatureCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureCore.swift; sourceTree = "<group>"; };
+		CCFEA0000000000000000002 /* FeatureServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureServices.swift; sourceTree = "<group>"; };
+		CCFEA0000000000000000003 /* FeatureViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureViews.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -585,6 +591,9 @@
 				14CEF4172C5CAED300855D72 /* ContentView.swift */,
 				AABBCCEE0000000000000003 /* NotchPlusViews.swift */,
 				AABBCCEE0000000000000002 /* NotchPlusServices.swift */,
+				CCFEA0000000000000000001 /* FeatureCore.swift */,
+				CCFEA0000000000000000002 /* FeatureServices.swift */,
+				CCFEA0000000000000000003 /* FeatureViews.swift */,
 				AABBCCEE0000000000000001 /* NotchPlusCore.swift */,
 				B17266E02C6532560031BA0D /* Localizable.xcstrings */,
 				14CEF4192C5CAED400855D72 /* Assets.xcassets */,
@@ -1005,6 +1014,9 @@
 				14CEF4182C5CAED300855D72 /* ContentView.swift in Sources */,
 				AABBCCDD0000000000000003 /* NotchPlusViews.swift in Sources */,
 				AABBCCDD0000000000000002 /* NotchPlusServices.swift in Sources */,
+				CCFEA1000000000000000001 /* FeatureCore.swift in Sources */,
+				CCFEA1000000000000000002 /* FeatureServices.swift in Sources */,
+				CCFEA1000000000000000003 /* FeatureViews.swift in Sources */,
 				AABBCCDD0000000000000001 /* NotchPlusCore.swift in Sources */,
 				9A987A0D2C73CA66005CA465 /* ShelfView.swift in Sources */,
 				1132E5142E777B920068732D /* YouTubeMusicNetworking.swift in Sources */,
@@ -1062,14 +1074,14 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 264;
+				CURRENT_PROJECT_VERSION = 265;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BoringNotchXPCHelper/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = BoringNotchXPCHelper;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				MACOSX_DEPLOYMENT_TARGET = 15.5;
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = local.torus.notchplus.BoringNotchXPCHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -1087,14 +1099,14 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 264;
+				CURRENT_PROJECT_VERSION = 265;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BoringNotchXPCHelper/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = BoringNotchXPCHelper;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				MACOSX_DEPLOYMENT_TARGET = 15.5;
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = local.torus.notchplus.BoringNotchXPCHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -1241,7 +1253,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 264;
+				CURRENT_PROJECT_VERSION = 265;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"boringNotch/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
@@ -1270,7 +1282,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = local.torus.notchplus;
 				PRODUCT_NAME = "Notch Plus";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1297,7 +1309,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 264;
+				CURRENT_PROJECT_VERSION = 265;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"boringNotch/Preview Content\"";
 				DEVELOPMENT_TEAM = "";
@@ -1325,7 +1337,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = local.torus.notchplus;
 				PRODUCT_NAME = "Notch Plus";
 				PROVISIONING_PROFILE_SPECIFIER = "";

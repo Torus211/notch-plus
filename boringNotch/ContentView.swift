@@ -15,6 +15,7 @@ import SwiftUIIntrospect
 
 @MainActor
 struct ContentView: View {
+    @ObservedObject private var features = NotchFeatures.shared
     @EnvironmentObject var vm: BoringViewModel
     @ObservedObject var webcamManager = WebcamManager.shared
 
@@ -228,6 +229,7 @@ struct ContentView: View {
         .background(dragDetector)
         .environmentObject(vm)
         .notchAccentTheme()
+        .transaction { if features.locked { $0.disablesAnimations = true } }
         .onChange(of: vm.anyDropZoneTargeting) { _, isTargeted in
             anyDropDebounceTask?.cancel()
 
@@ -258,6 +260,9 @@ struct ContentView: View {
 
     @ViewBuilder
     func NotchLayout() -> some View {
+        if features.locked {
+            Color.black.frame(width: vm.closedNotchSize.width, height: vm.effectiveClosedNotchHeight)
+        } else {
         VStack(alignment: .leading) {
             VStack(alignment: .leading) {
                 if coordinator.firstLaunch {
@@ -271,7 +276,9 @@ struct ContentView: View {
                     .padding(.top, 40)
                     Spacer()
                 } else {
-                    if coordinator.expandingView.type == .battery && coordinator.expandingView.show
+                    if features.banner != nil && vm.notchState == .closed {
+                        FeatureActivity(centerWidth: vm.closedNotchSize.width)
+                    } else if coordinator.expandingView.type == .battery && coordinator.expandingView.show
                         && vm.notchState == .closed && Defaults[.showPowerStatusNotifications]
                     {
                         HStack(spacing: 0) {
@@ -369,10 +376,10 @@ struct ContentView: View {
                         PlusCalendarView()
                     case .clipboard:
                         ClipboardHistoryView()
-                    case .focus:
-                        FocusTimerView()
-                    case .notes:
-                        QuickNotesView()
+                    case .weather:
+                        WeatherView()
+                    case .devices:
+                        DevicesView()
                     }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -390,6 +397,7 @@ struct ContentView: View {
             }
         }
         .onDrop(of: [.fileURL, .url, .utf8PlainText, .plainText, .data], delegate: GeneralDropTargetDelegate(isTargeted: $vm.generalDropTargeting))
+        }
     }
 
     @ViewBuilder

@@ -5,6 +5,7 @@ import AsyncXPCConnection
 final class XPCHelperClient {
     nonisolated static let shared = XPCHelperClient()
     
+    private let featureReceiver = FeatureEventReceiver()
     private let serviceName = "local.torus.notchplus.BoringNotchXPCHelper"
     
     private var remoteService: RemoteXPCService<BoringNotchXPCHelperProtocol>?
@@ -41,6 +42,8 @@ final class XPCHelperClient {
             }
         }
         
+        conn.exportedInterface = NSXPCInterface(with: NotchFeatureEventSink.self)
+        conn.exportedObject = featureReceiver
         conn.resume()
         
         let service = RemoteXPCService<BoringNotchXPCHelperProtocol>(
@@ -69,6 +72,13 @@ final class XPCHelperClient {
         )
     }
     
+    nonisolated func configureFeatures(bluetooth: Bool, notifications: Bool) async throws -> Data {
+        let service = await MainActor.run { ensureRemoteService() }
+        return try await service.withContinuation { remote, continuation in
+            remote.configureFeatures(bluetooth, notifications: notifications) { continuation.resume(returning: $0) }
+        }
+    }
+
     // MARK: - Accessibility
     
     nonisolated func requestAccessibilityAuthorization() {
