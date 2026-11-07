@@ -158,6 +158,10 @@ struct ContentView: View {
                             }
                         }
                     }
+                    .onReceive(NotificationCenter.default.publisher(for: Notification.Name("NotchPlusVolumePreview"))) { _ in
+                        vm.close()
+                        coordinator.previewVolume()
+                    }
                     .onReceive(NotificationCenter.default.publisher(for: .sharingDidFinish)) { _ in
                         if vm.notchState == .open && !isHovering && !vm.isBatteryPopoverActive {
                             hoverTask?.cancel()

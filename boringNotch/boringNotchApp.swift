@@ -31,6 +31,16 @@ struct DynamicNotchApp: App {
             UserDefaults.standard.set(true, forKey: "openLastTabByDefault")
             UserDefaults.standard.set(false, forKey: "showWhatsNew")
         }
+        // Adopt the in-island volume presentation once for existing installations.
+        if !UserDefaults.standard.bool(forKey: "np.islandVolume.v1") {
+            UserDefaults.standard.set(true, forKey: "inlineHUD")
+            UserDefaults.standard.set(true, forKey: "hudReplacement")
+            UserDefaults.standard.set(true, forKey: "np.islandVolume.v1")
+        }
+        if !UserDefaults.standard.bool(forKey: "np.islandVolume.authorization.v2") {
+            UserDefaults.standard.set(true, forKey: "hudReplacement")
+            UserDefaults.standard.set(true, forKey: "np.islandVolume.authorization.v2")
+        }
         updaterController = SPUStandardUpdaterController(
             startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
 
@@ -51,7 +61,7 @@ struct DynamicNotchApp: App {
                 SettingsWindowController.shared.showWindow()
             }
             .keyboardShortcut(KeyEquivalent(","), modifiers: .command)
-            Text("Notch Plus 1.0 · на основе Boring Notch 2.7.3")
+            Text("Notch Plus 1.1 · на основе Boring Notch 2.7.3")
             Divider()
             Button("Перезапустить Notch Plus") {
                 ApplicationRelauncher.restart()
@@ -456,13 +466,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         if Defaults[.hudReplacement] {
             Task { @MainActor in
-               let authorized = await XPCHelperClient.shared.isAccessibilityAuthorized()
+               let authorized = MediaKeyInterceptor.shared.isAccessibilityAuthorized()
                 if authorized {
                     MediaKeyInterceptor.shared.start(requireAccessibility: true, promptIfNeeded: false)
                 } else {
-                    let granted = await XPCHelperClient.shared.ensureAccessibilityAuthorization(promptIfNeeded: false)
+                    let granted = await MediaKeyInterceptor.shared.ensureAccessibilityAuthorization(promptIfNeeded: false)
                     if granted {
                         MediaKeyInterceptor.shared.start(requireAccessibility: true, promptIfNeeded: false)
+                    } else if !UserDefaults.standard.bool(forKey: "np.volumeSetupShown.v1") {
+                        UserDefaults.standard.set(true, forKey: "np.volumeSetupShown.v1")
+                        SettingsWindowController.shared.showWindow(initialTab: "HUD")
                     }
                 }
             }

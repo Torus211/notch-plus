@@ -129,10 +129,9 @@ class BoringViewCoordinator: ObservableObject {
         ) { [weak self] _ in
             Task { @MainActor in
                 guard let self = self else { return }
-                let granted = await XPCHelperClient.shared.isAccessibilityAuthorized()
+                let granted = MediaKeyInterceptor.shared.isAccessibilityAuthorized()
                 if !granted {
-                    // If permission was revoked, disable HUD replacement
-                    Defaults[.hudReplacement] = false
+                    MediaKeyInterceptor.shared.stop()
                 } else {
                     // If permission granted and user prefers HUD replacement, ensure interceptor is running
                     if Defaults[.hudReplacement] {
@@ -141,6 +140,13 @@ class BoringViewCoordinator: ObservableObject {
                 }
             }
         }
+
+        NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification,
+            object: nil, queue: .main) { _ in
+                if Defaults[.hudReplacement] {
+                    MediaKeyInterceptor.shared.start(requireAccessibility: true, promptIfNeeded: false)
+                }
+            }
 
         // Observe changes to hudReplacement
         hudReplacementCancellable = Defaults.publisher(.hudReplacement)
@@ -154,7 +160,7 @@ class BoringViewCoordinator: ObservableObject {
                     if change.newValue {
                         self.hudEnableTask = Task { @MainActor in
                             // Check prior authorization so we only restart if permissions were newly granted
-                            let priorAuthorized = await XPCHelperClient.shared.isAccessibilityAuthorized()
+                            let priorAuthorized = MediaKeyInterceptor.shared.isAccessibilityAuthorized()
 
                             MediaKeyInterceptor.shared.start(requireAccessibility: true, promptIfNeeded: true)
 
@@ -171,7 +177,7 @@ class BoringViewCoordinator: ObservableObject {
                                     // already granted; no restart needed
                                 }
                             } else {
-                                Defaults[.hudReplacement] = false
+                                MediaKeyInterceptor.shared.stop()
                             }
                         }
                     } else {
@@ -183,9 +189,9 @@ class BoringViewCoordinator: ObservableObject {
         // On startup, ensure the hudReplacement state reflects current authorization
         Task { @MainActor in
             if Defaults[.hudReplacement] {
-                let authorized = await XPCHelperClient.shared.isAccessibilityAuthorized()
+                let authorized = MediaKeyInterceptor.shared.isAccessibilityAuthorized()
                 if !authorized {
-                    Defaults[.hudReplacement] = false
+                    MediaKeyInterceptor.shared.stop()
                 } else {
                     MediaKeyInterceptor.shared.start(requireAccessibility: true, promptIfNeeded: false)
                 }
@@ -246,6 +252,12 @@ class BoringViewCoordinator: ObservableObject {
         if type == .mic {
             currentMicStatus = value == 1
         }
+    }
+
+    func previewVolume() {
+        sneakPeekDuration = 5
+        sneakPeek = .init(show: true, type: .volume,
+            value: VolumeManager.shared.isMuted ? 0 : CGFloat(VolumeManager.shared.rawVolume))
     }
 
     private var sneakPeekDuration: TimeInterval = 1.5

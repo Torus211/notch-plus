@@ -20,8 +20,9 @@ struct SettingsView: View {
 
     let updaterController: SPUStandardUpdaterController?
 
-    init(updaterController: SPUStandardUpdaterController? = nil) {
+    init(updaterController: SPUStandardUpdaterController? = nil, initialTab: String = "General") {
         self.updaterController = updaterController
+        _selectedTab = State(initialValue: initialTab)
     }
 
     var body: some View {
@@ -468,6 +469,7 @@ struct HUD: View {
     @Default(.enableGradient) var enableGradient
     @Default(.optionKeyAction) var optionKeyAction
     @ObservedObject var coordinator = BoringViewCoordinator.shared
+    @ObservedObject private var interceptor = MediaKeyInterceptor.shared
     @State private var accessibilityAuthorized = false
     var body: some View {
         Form {
@@ -479,26 +481,39 @@ struct HUD: View {
                 .help("Enable Accessibility in System Settings → Privacy & Security → Accessibility")
                 .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
                     Task { @MainActor in
-                        let helper = await XPCHelperClient.shared.isAccessibilityAuthorized()
+                        let helper = MediaKeyInterceptor.shared.isAccessibilityAuthorized()
                             accessibilityAuthorized = helper
                         }
                     }
 
                 if !accessibilityAuthorized {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Accessibility access is required to replace the system HUD.")
+                        Text("Allow Notch Plus in System Settings → Privacy & Security → Accessibility (Device Control and Data Access on newer macOS).")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
 
                         HStack(spacing: 12) {
                             Button("Request Accessibility") {
-                                // Use unsandboxed XPC helper if available so the system prompt is shown
-                                XPCHelperClient.shared.requestAccessibilityAuthorization()
+                                MediaKeyInterceptor.shared.requestAccessibilityAuthorization()
                             }
                             .buttonStyle(.borderedProminent)
+                            Button("Open System Settings") {
+                                if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+                                    NSWorkspace.shared.open(url)
+                                }
+                            }
                         }
+                        Text("Already enabled after an update? Remove the old Notch Plus entry with −, add /Applications/Notch Plus.app with +, enable it, then quit and reopen Notch Plus. Your notes and clipboard history are preserved.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.top, 6)
+                }
+                if accessibilityAuthorized && coordinator.hudReplacement {
+                    Text(interceptor.isRunning ? "Keyboard volume control is active in Dynamic Island."
+                        : "macOS did not allow keyboard interception for this build. Restart Notch Plus after updating its system permission.")
+                        .font(.caption)
+                        .foregroundStyle(interceptor.isRunning ? .secondary : Color.orange)
                 }
                 Picker("Option key behaviour", selection: $optionKeyAction) {
                     ForEach(OptionKeyAction.allCases) { opt in
@@ -513,7 +528,7 @@ struct HUD: View {
                 Picker("HUD style", selection: $inlineHUD) {
                     Text("Default")
                         .tag(false)
-                    Text("Inline")
+                    Text("Inside Dynamic Island")
                         .tag(true)
                 }
                 .onChange(of: Defaults[.inlineHUD]) {
@@ -523,6 +538,11 @@ struct HUD: View {
                             Defaults[.enableGradient] = false
                         }
                     }
+                }
+                Button("Preview volume in Dynamic Island") {
+                    inlineHUD = true
+                    NotificationCenter.default.post(name: Notification.Name("NotchPlusVolumePreview"), object: nil)
+                    SettingsWindowController.shared.close()
                 }
                 Picker("Progressbar style", selection: $enableGradient) {
                     Text("Hierarchical")
@@ -545,12 +565,10 @@ struct HUD: View {
         .accentColor(.effectiveAccent)
         .navigationTitle("HUDs")
         .task {
-            accessibilityAuthorized = await XPCHelperClient.shared.isAccessibilityAuthorized()
+            accessibilityAuthorized = MediaKeyInterceptor.shared.isAccessibilityAuthorized()
         }
         .onReceive(NotificationCenter.default.publisher(for: .accessibilityAuthorizationChanged)) { notification in
-            if let granted = notification.userInfo?["granted"] as? Bool {
-                accessibilityAuthorized = granted
-            }
+            accessibilityAuthorized = MediaKeyInterceptor.shared.isAccessibilityAuthorized()
         }
     }
 }

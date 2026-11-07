@@ -37,7 +37,7 @@ class SettingsWindowController: NSWindowController {
         setupWindow()
     }
     
-    private func setupWindow() {
+    private func setupWindow(initialTab: String = "General") {
         guard let window = window else { return }
         
         window.title = "Notch Plus — Настройки"
@@ -58,7 +58,7 @@ class SettingsWindowController: NSWindowController {
         window.identifier = NSUserInterfaceItemIdentifier("BoringNotchSettingsWindow")
         
         // Create the SwiftUI content
-        let settingsView = SettingsView(updaterController: updaterController)
+        let settingsView = SettingsView(updaterController: updaterController, initialTab: initialTab)
         let hostingView = NSHostingView(rootView: settingsView)
         window.contentView = hostingView
         
@@ -66,7 +66,8 @@ class SettingsWindowController: NSWindowController {
         window.delegate = self
     }
     
-    func showWindow() {
+    func showWindow(initialTab: String? = nil) {
+        if let initialTab { setupWindow(initialTab: initialTab) }
         // Settings can receive keyboard focus without adding an icon to the Dock.
         NSApp.setActivationPolicy(.accessory)
         

@@ -13,10 +13,12 @@ import Defaults
 
 private let kSystemDefinedEventType = CGEventType(rawValue: 14)!
 
-final class MediaKeyInterceptor {
+final class MediaKeyInterceptor: ObservableObject {
     static let shared = MediaKeyInterceptor()
 
     private enum NXKeyType: Int { case soundUp = 0, soundDown = 1, brightnessUp = 2, brightnessDown = 3, mute = 7 }
+
+    @Published private(set) var isRunning = false
 
     private var eventTap: CFMachPort? = nil
     private var runLoopSource: CFRunLoopSource? = nil
@@ -52,8 +54,12 @@ final class MediaKeyInterceptor {
             options: .defaultTap,
             eventsOfInterest: CGEventMask(mask),
             callback: { _, type, cgEvent, userInfo in
-                guard let userInfo else { return Unmanaged.passRetained(cgEvent) }
+                guard let userInfo else { return Unmanaged.passUnretained(cgEvent) }
                 let interceptor = Unmanaged<MediaKeyInterceptor>.fromOpaque(userInfo).takeUnretainedValue()
+                if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+                    if let tap = interceptor.eventTap { CGEvent.tapEnable(tap: tap, enable: true) }
+                    return Unmanaged.passUnretained(cgEvent)
+                }
                 return interceptor.handleSystemDefined(event: cgEvent)
             },
             userInfo: UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
@@ -62,28 +68,31 @@ final class MediaKeyInterceptor {
             runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
             if let runLoopSource { CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, .commonModes) }
             CGEvent.tapEnable(tap: eventTap, enable: true)
+            isRunning = CGEvent.tapIsEnabled(tap: eventTap)
         }
     }
 
     func stop() {
+        isRunning = false
         if let eventTap { CGEvent.tapEnable(tap: eventTap, enable: false) }
         if let runLoopSource { CFRunLoopRemoveSource(CFRunLoopGetMain(), runLoopSource, .commonModes) }
         runLoopSource = nil
         eventTap = nil
     }
 
-      func requestAccessibilityAuthorization() {
-          XPCHelperClient.shared.requestAccessibilityAuthorization()
+    func requestAccessibilityAuthorization() {
+        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+        _ = AXIsProcessTrustedWithOptions(options)
     }
 
     func ensureAccessibilityAuthorization(promptIfNeeded: Bool = false) async -> Bool {
-        await XPCHelperClient.shared.ensureAccessibilityAuthorization(promptIfNeeded: promptIfNeeded)
+        if promptIfNeeded && !isAccessibilityAuthorized() { requestAccessibilityAuthorization() }
+        return isAccessibilityAuthorized()
     }
-
 
     private func handleSystemDefined(event cgEvent: CGEvent) -> Unmanaged<CGEvent>? {
         guard let nsEvent = NSEvent(cgEvent: cgEvent), nsEvent.type == .systemDefined, nsEvent.subtype.rawValue == 8 else {
-            return Unmanaged.passRetained(cgEvent)
+            return Unmanaged.passUnretained(cgEvent)
         }
         let data1 = nsEvent.data1
         let keyCode = (data1 & 0xFFFF_0000) >> 16
@@ -93,10 +102,11 @@ final class MediaKeyInterceptor {
         // Only handle the key-down event to avoid duplicate handling.
         let isKeyDown = (stateByte == 0xA)
 
-        guard isKeyDown else { return Unmanaged.passRetained(cgEvent) }
         guard let nx = NXKeyType(rawValue: keyCode) else {
-                return Unmanaged.passRetained(cgEvent)
+                return Unmanaged.passUnretained(cgEvent)
             }
+        // Consume both halves of intercepted media keys, but adjust only on key-down.
+        guard isKeyDown else { return nil }
         // Inspect modifier flags to support option/shift/command behaviors
         let flags = nsEvent.modifierFlags
         let optionDown = flags.contains(.option)

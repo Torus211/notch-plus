@@ -15,6 +15,9 @@ struct InlineHUD: View {
     @Binding var hoverAnimation: Bool
     @Binding var gestureProgress: CGFloat
     var body: some View {
+        if type == .volume {
+            islandVolume
+        } else {
         HStack {
             HStack(spacing: 5) {
                 Group {
@@ -102,6 +105,87 @@ struct InlineHUD: View {
         .frame(height: vm.closedNotchSize.height + (hoverAnimation ? 8 : 0), alignment: .center)
     }
     
+    }
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isAdjustingVolume = false
+    private var volumeLevel: CGFloat { min(1, max(0, value)) }
+
+    private var islandVolume: some View {
+        HStack(spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: icon.isEmpty
+                    ? (volumeLevel == 0 ? "speaker.slash.fill" : SpeakerSymbol(volumeLevel) + ".fill")
+                    : icon)
+                    .font(.system(size: 14, weight: .semibold))
+                    .contentTransition(.symbolEffect(.replace))
+                    .frame(width: 22)
+                Text(volumeLevel == 0 ? "Muted" : "Volume")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.8))
+                    .contentTransition(.opacity)
+            }
+            .frame(width: 104, alignment: .leading)
+
+            // Keep all controls clear of the physical camera cutout.
+            Color.clear.frame(width: vm.closedNotchSize.width - 20)
+
+            HStack(spacing: 8) {
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(.white.opacity(0.16))
+                        Capsule()
+                            .fill(LinearGradient(colors: [.white.opacity(0.75), .white],
+                                startPoint: .leading, endPoint: .trailing))
+                            .frame(width: geometry.size.width * volumeLevel)
+                    }
+                    .frame(height: isAdjustingVolume ? 7 : 5)
+                    .frame(maxHeight: .infinity)
+                    .contentShape(Rectangle())
+                    .gesture(DragGesture(minimumDistance: 0)
+                        .onChanged { gesture in
+                            isAdjustingVolume = true
+                            setVolume(gesture.location.x / max(1, geometry.size.width), duration: 60)
+                        }
+                        .onEnded { _ in
+                            isAdjustingVolume = false
+                            setVolume(volumeLevel, duration: 1.8)
+                        })
+                }
+                .frame(height: 24)
+                Text("\(Int((volumeLevel * 100).rounded()))")
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(.white.opacity(0.8))
+                    .contentTransition(.numericText())
+                    .frame(width: 25, alignment: .trailing)
+            }
+            .frame(width: 104)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Volume")
+            .accessibilityValue("\(Int((volumeLevel * 100).rounded())) percent")
+            .accessibilityAdjustableAction { direction in
+                switch direction {
+                case .increment: setVolume(volumeLevel + 0.05, duration: 1.8)
+                case .decrement: setVolume(volumeLevel - 0.05, duration: 1.8)
+                @unknown default: break
+                }
+            }
+        }
+        .foregroundStyle(.white)
+        .frame(height: vm.effectiveClosedNotchHeight)
+        .animation(reduceMotion || isAdjustingVolume ? nil : .smooth(duration: 0.18), value: value)
+        .animation(reduceMotion ? nil : .smooth(duration: 0.18), value: isAdjustingVolume)
+    }
+
+    private func setVolume(_ level: CGFloat, duration: TimeInterval) {
+        let level = min(1, max(0, level))
+        value = level
+        VolumeManager.shared.setAbsolute(Float32(level))
+        BoringViewCoordinator.shared.toggleSneakPeek(status: true, type: .volume,
+            duration: duration, value: level)
+    }
+
     func SpeakerSymbol(_ value: CGFloat) -> String {
         switch(value) {
             case 0:

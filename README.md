@@ -7,15 +7,43 @@ Native SwiftUI notch app with six tabs: Music, Shelf, Calendar, Clipboard, Focus
 - Moves the existing calendar/events/reminders into a dedicated tab.
 - Adds local clipboard history with search, pins, pause and deletion.
 - Adds a focus/break timer and an autosaving quick note.
+- Shows a smooth, draggable volume control with a percentage inside Dynamic Island.
+- Runs without a Dock icon, including while settings are open.
 - Bounds clipboard payloads and thumbnail caching, coalesces background writes,
   and stops player/lyrics timeline updates while playback is paused.
 
 ## Install
 
-Download the [Apple Silicon app](https://github.com/Torus211/notch-plus/raw/refs/heads/main/releases/NotchPlus-1.0.0-arm64.zip)
-or visit **Releases**, unzip it, move **Notch Plus.app**
-to Applications, and launch. This is an ad-hoc signed local build, not notarized by Apple.
-Only run one notch application at a time. macOS may ask for calendar/reminder access.
+Download **[Notch Plus 1.1.0 for Apple Silicon](https://github.com/Torus211/notch-plus/releases/download/v1.1.0/NotchPlus-1.1.0-arm64.zip)**
+or visit **[the latest release](https://github.com/Torus211/notch-plus/releases/latest)**.
+The packaged app and helper require **macOS 15.5 or later** and an **Apple Silicon Mac**.
+Intel Macs are not supported by this archive.
+
+1. Quit Notch Plus and other notch apps. Unzip and move **Notch Plus.app** to **Applications**.
+2. Launch it from Applications. This build is ad-hoc signed and **not notarized by Apple**;
+   macOS may block its first launch. Only if you trust this download, use the approval
+   offered in **System Settings → Privacy & Security**.
+3. To replace the system volume/brightness indicator, allow **Notch Plus** in
+   **System Settings → Privacy & Security → Accessibility** (called **Device Control
+   and Data Access** on newer macOS). macOS may ask for Touch ID or your Mac password.
+   The app opens its HUD setup page once when this access is missing.
+4. Quit and reopen Notch Plus. In **Settings → HUDs**, keep **Replace system HUD** on
+   and choose **Inside Dynamic Island**. The status should read
+   **Keyboard volume control is active in Dynamic Island.**
+
+Volume now uses a smooth bar and percentage inside the island, with mouse dragging.
+Without the required system permission, volume keys continue to work through macOS.
+Calendar/reminder access is requested separately. Permissions cannot be bundled with a download.
+
+### Updating from an older build
+
+Replace the app in Applications while it is closed; notes and clipboard history are
+kept in the existing app container. If permission is shown as enabled in macOS but
+Notch Plus still reports no access, remove its old permission entry with **−**, add
+**/Applications/Notch Plus.app** with **+**, enable it, then quit and reopen the app.
+This was necessary locally after rebuilding the ad-hoc signed app. A working switch
+in System Settings alone does not prove the current running build has access.
+Automatic updates are disabled; download future releases manually.
 
 ## Build
 
