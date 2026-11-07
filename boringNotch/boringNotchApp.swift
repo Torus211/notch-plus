@@ -21,22 +21,39 @@ struct DynamicNotchApp: App {
     let updaterController: SPUStandardUpdaterController
 
     init() {
+        if !UserDefaults.standard.bool(forKey: "np.initialized") {
+            if let url = Bundle.main.url(forResource: "InitialPreferences", withExtension: "plist"),
+               let data = try? Data(contentsOf: url),
+               let values = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any] {
+                for (key, value) in values { UserDefaults.standard.set(value, forKey: key) }
+            }
+            UserDefaults.standard.set(true, forKey: "np.initialized")
+            UserDefaults.standard.set(true, forKey: "openLastTabByDefault")
+            UserDefaults.standard.set(false, forKey: "showWhatsNew")
+        }
         updaterController = SPUStandardUpdaterController(
-            startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+            startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
 
         // Initialize the settings window controller with the updater controller
         SettingsWindowController.shared.setUpdaterController(updaterController)
     }
 
     var body: some Scene {
-        MenuBarExtra("boring.notch", systemImage: "sparkle", isInserted: $showMenuBarIcon) {
+        MenuBarExtra("Notch Plus", systemImage: "sparkle", isInserted: $showMenuBarIcon) {
+            ForEach(tabs) { tab in
+                Button(tab.label) {
+                    BoringViewCoordinator.shared.currentView = tab.view
+                    appDelegate.vm.open()
+                }
+            }
+            Divider()
             Button("Settings") {
                 SettingsWindowController.shared.showWindow()
             }
             .keyboardShortcut(KeyEquivalent(","), modifiers: .command)
-            CheckForUpdatesView(updater: updaterController.updater)
+            Text("Notch Plus 1.0 · на основе Boring Notch 2.7.3")
             Divider()
-            Button("Restart Boring Notch") {
+            Button("Перезапустить Notch Plus") {
                 ApplicationRelauncher.restart()
             }
             Button("Quit", role: .destructive) {
@@ -71,6 +88,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        NotchPlusStorage.shared.flush()
+        ClipboardHistory.shared.flush()
+        QuickNotes.shared.flush()
         NotificationCenter.default.removeObserver(self)
         if let observer = screenLockedObserver {
             DistributedNotificationCenter.default().removeObserver(observer)
@@ -277,6 +297,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        _ = ClipboardHistory.shared
+        _ = FocusTimer.shared
 
         NotificationCenter.default.addObserver(
             self,

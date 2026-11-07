@@ -15,11 +15,17 @@ struct TabButton: View {
     
     var body: some View {
         Button(action: onClick) {
-            Image(systemName: icon)
-                .padding(.horizontal, 15)
+            HStack(spacing: 5) {
+                Image(systemName: icon)
+                Text(label).font(.system(size: 11, weight: .medium))
+            }
+                .frame(maxWidth: .infinity, minHeight: 28)
                 .contentShape(Capsule())
         }
         .buttonStyle(PlainButtonStyle())
+        .help(label)
+        .accessibilityLabel(label)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
 

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Defaults
 
 struct TabModel: Identifiable {
     let id = UUID()
@@ -15,8 +16,12 @@ struct TabModel: Identifiable {
 }
 
 let tabs = [
-    TabModel(label: "Home", icon: "house.fill", view: .home),
-    TabModel(label: "Shelf", icon: "tray.fill", view: .shelf)
+    TabModel(label: "Музыка", icon: "music.note", view: .home),
+    TabModel(label: "Полка", icon: "tray.fill", view: .shelf),
+    TabModel(label: "Календарь", icon: "calendar", view: .calendar),
+    TabModel(label: "Буфер", icon: "doc.on.clipboard", view: .clipboard),
+    TabModel(label: "Фокус", icon: "timer", view: .focus),
+    TabModel(label: "Заметки", icon: "square.and.pencil", view: .notes)
 ]
 
 struct TabSelectionView: View {
@@ -24,13 +29,17 @@ struct TabSelectionView: View {
     @Namespace var animation
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(tabs) { tab in
+            ForEach(tabs.filter { $0.view != .shelf || Defaults[.boringShelf] }) { tab in
                     TabButton(label: tab.label, icon: tab.icon, selected: coordinator.currentView == tab.view) {
                         withAnimation(.smooth) {
                             coordinator.currentView = tab.view
                         }
+                        if tab.view != .notes && tab.view != .clipboard {
+                            NSApp.keyWindow?.resignKey()
+                        }
                     }
-                    .frame(height: 26)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 32)
                     .foregroundStyle(tab.view == coordinator.currentView ? .white : .gray)
                     .background {
                         if tab.view == coordinator.currentView {
@@ -46,6 +55,8 @@ struct TabSelectionView: View {
                     }
             }
         }
+        .padding(3)
+        .background(.white.opacity(0.045), in: Capsule())
         .clipShape(Capsule())
     }
 }

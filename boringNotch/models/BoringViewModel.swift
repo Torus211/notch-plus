@@ -202,6 +202,9 @@ class BoringViewModel: NSObject, ObservableObject {
         if SharingStateManager.shared.preventNotchClose {
             return
         }
+        if NSApp.keyWindow is BoringNotchWindow || NSApp.keyWindow is BoringNotchSkyLightWindow {
+            NSApp.keyWindow?.resignKey()
+        }
         self.notchSize = getClosedNotchSize(screenUUID: self.screenUUID)
         self.closedNotchSize = self.notchSize
         self.notchState = .closed

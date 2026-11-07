@@ -29,8 +29,7 @@ struct CheckForUpdatesView: View {
     }
     
     var body: some View {
-        Button("Check for Updates…", action: updater.checkForUpdates)
-            .disabled(!checkForUpdatesViewModel.canCheckForUpdates)
+        Text("Notch Plus · локальная сборка")
     }
 }
 
@@ -48,16 +47,7 @@ struct UpdaterSettingsView: View {
     
     var body: some View {
         Section {
-            Toggle("Automatically check for updates", isOn: $automaticallyChecksForUpdates)
-                .onChange(of: automaticallyChecksForUpdates) { _, newValue in
-                    updater.automaticallyChecksForUpdates = newValue
-                }
-            
-            Toggle("Automatically download updates", isOn: $automaticallyDownloadsUpdates)
-                .disabled(!automaticallyChecksForUpdates)
-                .onChange(of: automaticallyDownloadsUpdates) { _, newValue in
-                    updater.automaticallyDownloadsUpdates = newValue
-                }
+            Text("Notch Plus обновляется локальной сборкой из исходников. Основа — Boring Notch 2.7.3 (GPL-3.0).")
         } header: {
             HStack {
                 Text("Software updates")

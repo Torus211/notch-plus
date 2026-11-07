@@ -106,6 +106,8 @@ class BoringNotchSkyLightWindow: NSPanel {
     
     private var observers: Set<AnyCancellable> = []
     
-    override var canBecomeKey: Bool { false }
+    override var canBecomeKey: Bool {
+        BoringViewCoordinator.shared.currentView == .clipboard || BoringViewCoordinator.shared.currentView == .notes
+    }
     override var canBecomeMain: Bool { false }
 }

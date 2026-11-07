@@ -41,7 +41,7 @@ class BoringNotchWindow: NSPanel {
     }
     
     override var canBecomeKey: Bool {
-        false
+        BoringViewCoordinator.shared.currentView == .clipboard || BoringViewCoordinator.shared.currentView == .notes
     }
     
     override var canBecomeMain: Bool {

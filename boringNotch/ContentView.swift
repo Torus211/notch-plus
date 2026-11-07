@@ -352,14 +352,28 @@ struct ContentView: View {
               }
               .zIndex(2)
             if vm.notchState == .open {
-                VStack {
+                VStack(spacing: 12) {
+                    TabSelectionView()
+                    Group {
                     switch coordinator.currentView {
                     case .home:
                         NotchHomeView(albumArtNamespace: albumArtNamespace)
                     case .shelf:
                         ShelfView()
+                    case .calendar:
+                        PlusCalendarView()
+                    case .clipboard:
+                        ClipboardHistoryView()
+                    case .focus:
+                        FocusTimerView()
+                    case .notes:
+                        QuickNotesView()
                     }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
+                .padding(.top, 8)
+                .onExitCommand { NSApp.keyWindow?.resignKey(); vm.close() }
                 .transition(
                     .scale(scale: 0.8, anchor: .top)
                     .combined(with: .opacity)
@@ -512,6 +526,7 @@ struct ContentView: View {
     }
 
     private func doOpen() {
+        guard vm.notchState == .closed else { return }
         withAnimation(animationSpring) {
             vm.open()
         }
@@ -557,7 +572,7 @@ struct ContentView: View {
                         self.isHovering = false
                     }
                     
-                    if self.vm.notchState == .open && !self.vm.isBatteryPopoverActive && !SharingStateManager.shared.preventNotchClose {
+                    if self.vm.notchState == .open && !self.vm.isBatteryPopoverActive && !SharingStateManager.shared.preventNotchClose && !(NSApp.keyWindow is BoringNotchWindow) && !(NSApp.keyWindow is BoringNotchSkyLightWindow) {
                         self.vm.close()
                     }
                 }

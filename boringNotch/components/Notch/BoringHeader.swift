@@ -16,11 +16,10 @@ struct BoringHeader: View {
     var body: some View {
         HStack(spacing: 0) {
             HStack {
-                if (!tvm.isEmpty || coordinator.alwaysShowTabs) && Defaults[.boringShelf] {
-                    TabSelectionView()
-                } else if vm.notchState == .open {
-                    EmptyView()
-                }
+                Label("NOTCH PLUS", systemImage: "sparkle")
+                    .font(.system(size: 10, weight: .semibold, design: .rounded))
+                    .tracking(1.2)
+                    .foregroundStyle(.mint)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .opacity(vm.notchState == .closed ? 0 : 1)

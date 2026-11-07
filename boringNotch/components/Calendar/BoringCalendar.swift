@@ -179,6 +179,7 @@ struct WheelPicker: View {
 }
 
 struct CalendarView: View {
+    var contentHeight: CGFloat = 120
     @EnvironmentObject var vm: BoringViewModel
     @ObservedObject private var calendarManager = CalendarManager.shared
     @State private var selectedDate = Date()
@@ -224,7 +225,7 @@ struct CalendarView: View {
             }
         }
         .listRowBackground(Color.clear)
-        .frame(height: 120)
+        .frame(height: contentHeight)
         .onChange(of: selectedDate) {
             Task {
                 await calendarManager.updateCurrentDate(selectedDate)
